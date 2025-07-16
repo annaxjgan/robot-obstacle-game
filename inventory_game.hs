@@ -8,7 +8,7 @@ import Control.Monad.State
 -- Each use item removes the item if it exists, otherwise, the inventory is unchanged
 
 type Inventory = [String]
-data Action = PickUp String | Use String
+data Action = Pickup String | Use String
 
 -- This adds the item to the beginning of the inventory
 pickup :: String -> State Inventory ()
@@ -22,15 +22,21 @@ pickup x = do
 use :: String -> State Inventory ()
 use x = do
     n <- get 
-    put (filter (/= x) n)
+    put (removeOne x n)
     return ()
+
+removeOne :: String -> Inventory -> Inventory
+removeOne _ [] = []
+removeOne a (x:xs)
+    | a == x = xs
+    | otherwise = x: removeOne a xs
 
 -- takes a list of actions and runs them in order
 performActions :: [Action] -> State Inventory ()
 performActions [] = return ()
 performActions (action:actions) = do
     case action of 
-        PickUp x -> pickup x
+        Pickup x -> pickup x
         Use x -> use x
     performActions actions
 
